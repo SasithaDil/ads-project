@@ -24,10 +24,11 @@ class AdsViewModel: ObservableObject{
             
             let ads = try await db.getDocuments()
             
-            
-            self.ads = ads.documents.compactMap({ ad in
-                return try? ad.data(as: AdPost.self)
-            })
+            DispatchQueue.main.async {
+                self.ads = ads.documents.compactMap({ ad in
+                    return try? ad.data(as: AdPost.self)
+                })
+            }
             
         }
         catch{
@@ -48,17 +49,17 @@ class AdsViewModel: ObservableObject{
     }
     func writeAd(content: [adContent], sellerName: String, adTitle: String){
         do{
-            
+
             withAnimation {
                 isWriting = true
             }
-            
+
             let ad = AdPost(title: adTitle, seller: sellerName, adContent: content, date: Timestamp(date: Date()))
-            
+
             let _ = try Firestore.firestore().collection("Ads").document().setData(from: ad)
-            
+
             withAnimation {
-                
+
                 ads?.append(ad)
                 isWriting = true
                 createAd = false
